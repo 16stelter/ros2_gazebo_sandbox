@@ -79,8 +79,12 @@ def generate_launch_description():
     topic_bridge = Node(
         package="ros_gz_bridge",
         executable="parameter_bridge",
-        name="clock_bridge",
+        name="ros_bridge",
         arguments=[
+            ["/world/", LaunchConfiguration("world_name"), "/control@ros_gz_interfaces/srv/ControlWorld"],
+            ["/world/", LaunchConfiguration("world_name"), "/create@ros_gz_interfaces/srv/SpawnEntity"],
+            ["/world/", LaunchConfiguration("world_name"), "/delete@ros_gz_interfaces/srv/DeleteEntity"],
+            ["/world/", LaunchConfiguration("world_name"), "/set_pose@ros_gz_interfaces/srv/SetEntityPose"],
             "/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock",
         ],
         parameters=[
