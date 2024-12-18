@@ -20,7 +20,3 @@ The project also expects some robot models:
 
 * [LEO Rover](https://github.com/LeoRover/leo_common-ros2)
 * [LEO Sim](https://github.com/LeoRover/leo_simulator-ros2)
-
-## Known Issues
-
-Currently deleting entities via service does not work
