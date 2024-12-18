@@ -9,7 +9,7 @@
         <collision name="collision">
             <geometry>
             <mesh>
-                <uri>model://output.stl</uri>
+                <uri>model://{stl_path}</uri>
             </mesh>
             </geometry>
         </collision>
@@ -17,7 +17,7 @@
         <visual name="visual">	
             <geometry>
                 <mesh>
-                    <uri>model://output.stl</uri>
+                    <uri>model://{stl_path}</uri>
                 </mesh>
             </geometry>
             <material>
