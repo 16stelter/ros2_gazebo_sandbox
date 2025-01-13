@@ -12,6 +12,8 @@ def generate_launch_description():
     pkg_ros_gazebo_sim = get_package_share_directory("ros_gz_sim")
     package_path = get_package_share_directory("ros2_gazebo_sandbox")
 
+    world_name = DeclareLaunchArgument("world_name", default_value="empty", description="Name of the world to load")
+
     sim_world = DeclareLaunchArgument(
         "sim_world",
         default_value=os.path.join(package_path, "worlds", "shackleton.sdf"),
@@ -97,6 +99,7 @@ def generate_launch_description():
 
     return LaunchDescription(
         [
+            world_name,
             sim_world,
             robot1_ns,
             robot2_ns,

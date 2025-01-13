@@ -61,6 +61,10 @@ def spawn_robot(context: LaunchContext, namespace: LaunchConfiguration, x, y, z)
             {"use_sim_time": True},
             {"robot_description": robot_desc},
         ],
+        remappings=[
+            ('/tf', robot_ns + '/tf'),
+            ('/tf_static', robot_ns + '/tf_static'),
+        ]
     )
 
     joint_state_publisher = Node(
@@ -102,7 +106,8 @@ def spawn_robot(context: LaunchContext, namespace: LaunchConfiguration, x, y, z)
         name=node_name_prefix + "parameter_bridge",
         arguments=[
             robot_ns + "/cmd_vel@geometry_msgs/msg/Twist]gz.msgs.Twist",
-            robot_ns + "/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry",
+            #robot_ns + "/odom@nav_msgs/msg/Odometry[gz.msgs.Odometry",
+            robot_ns + "/true_pose@nav_msgs/msg/Odometry[gz.msgs.Odometry",
             robot_ns + "/tf@tf2_msgs/msg/TFMessage[gz.msgs.Pose_V",
             robot_ns + "/imu/data_raw@sensor_msgs/msg/Imu[gz.msgs.IMU",
             robot_ns + "/scan@sensor_msgs/msg/LaserScan[gz.msgs.LaserScan",
