@@ -48,7 +48,7 @@ def spawn_robot(context: LaunchContext, namespace: LaunchConfiguration, x, y, z)
         node_name_prefix = ""
     else:
         robot_gazebo_name = "leo_rover_" + robot_ns
-        node_name_prefix = robot_ns + "_"
+        node_name_prefix = robot_ns
 
     # Launch robot state publisher node
     robot_state_publisher = Node(
@@ -97,6 +97,7 @@ def spawn_robot(context: LaunchContext, namespace: LaunchConfiguration, x, y, z)
 
     # Bridge ROS topics and Gazebo messages for establishing communication
     topic_bridge = Node(
+        namespace=robot_ns,
         package="ros_gz_bridge",
         executable="parameter_bridge",
         name=node_name_prefix + "parameter_bridge",
@@ -121,6 +122,7 @@ def spawn_robot(context: LaunchContext, namespace: LaunchConfiguration, x, y, z)
 
     # Camera image bridge
     image_bridge = Node(
+        namespace=robot_ns,
         package="ros_gz_image",
         executable="image_bridge",
         name=node_name_prefix + "image_bridge",
