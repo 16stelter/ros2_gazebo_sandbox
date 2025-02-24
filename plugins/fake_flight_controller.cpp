@@ -6,33 +6,38 @@
 #include <gz/plugin/Register.hh>
 #include <gz/transport/Node.hh>
 #include <gz/msgs/twist.pb.h>
+#include "gz/sim/components/LinearVelocity.hh"
+#include "gz/sim/components/AngularVelocity.hh"
+#include "gz/sim/Util.hh"
 
 using namespace gz;
+using namespace sim;
+using namespace systems;
 
 namespace gz_plugins
 {
 class FakeFlightController
-  : public gz::sim::System,
-    public gz::sim::ISystemConfigure,
-    public gz::sim::ISystemUpdate
+  : public System,
+    public ISystemConfigure,
+    public ISystemUpdate
 {
-  gz::sim::Model model_{gz::sim::kNullEntity};
+  Model model_{kNullEntity};
   double force_constant_;
   bool configured_{false};
-  gz::sim::Link base_link_;
-  gz::sim::EntityComponentManager *ecm_ = nullptr;
+  Link base_link_;
+  EntityComponentManager *ecm_ = nullptr;
   gz::transport::Node node_;
   msgs::Twist last_msg_;
   std::string topic_;
 
 public:
   void Configure(
-    const gz::sim::Entity & entity, 
+    const Entity & entity, 
     const std::shared_ptr<const sdf::Element> & sdf,
-    gz::sim::EntityComponentManager & ecm,
-    gz::sim::EventManager & /*eventMgr*/) override
+    EntityComponentManager & ecm,
+    EventManager & /*eventMgr*/) override
   {
-    model_ = gz::sim::Model(entity);
+    model_ = Model(entity);
 
     if (!model_.Valid(ecm)) {
       gzerr  << "FakeFlightController plugin should be attached to a model "
@@ -58,18 +63,22 @@ public:
     topic_ = sdf->Get<std::string>("topic");
     
 
+    enableComponent<components::WorldAngularVelocity>(ecm,
+          base_link_.Entity());
+    enableComponent<components::WorldLinearVelocity>(ecm,
+          base_link_.Entity());
 
     ecm_ = &ecm;
     configured_ = true;
 
     node_.Subscribe(topic_, &FakeFlightController::OnMessage, this);
 
-    base_link_ = gz::sim::Link(model_.LinkByName(ecm, "base_link"));
+    base_link_ = Link(model_.LinkByName(ecm, "base_link"));
   }
 
   void Update(
-    const gz::sim::UpdateInfo & info,
-    gz::sim::EntityComponentManager & ecm) override
+    const UpdateInfo & info,
+    EntityComponentManager & ecm) override
   {
     if (!configured_ || info.paused) {return;}
 
@@ -105,6 +114,6 @@ private:
 
 GZ_ADD_PLUGIN(
   gz_plugins::FakeFlightController,
-  gz::sim::System,
+  System,
   gz_plugins::FakeFlightController::ISystemConfigure,
   gz_plugins::FakeFlightController::ISystemUpdate)
