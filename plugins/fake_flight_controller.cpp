@@ -62,46 +62,37 @@ public:
     node_.Subscribe(topic_, &FakeFlightController::OnMessage, this);
     base_link_ = Link(model_.LinkByName(ecm, "base_link"));
 
+    enableComponent<components::WorldLinearVelocity>(ecm, base_link_.Entity(), true);
+    enableComponent<components::WorldAngularVelocity>(ecm, base_link_.Entity(), true);
+
     configured_ = true;
   }
 
-  void Update(
+void Update(
     const UpdateInfo & info,
     EntityComponentManager & ecm) override
-  {
-    if (!configured_ || info.paused) {return;}
+{
+  if (!configured_ || info.paused) { return; }
 
-    if (updated_) {
-      //base_link_.SetLinearVelocity(ecm, math::Vector3d(0, 0, 0));
-      //base_link_.SetAngularVelocity(ecm, math::Vector3d(0, 0, 0));
-      updated_ = false;
-    }
-
+  if (updated_) {
     if (last_msg_.has_linear() && last_msg_.has_angular()) {
-      math::Vector3 force(last_msg_.linear().x() * force_constant_,
-                          last_msg_.linear().y() * force_constant_,
-                          last_msg_.linear().z() * force_constant_);
+      math::Vector3d force(last_msg_.linear().x() * force_constant_,
+                            last_msg_.linear().y() * force_constant_,
+                            last_msg_.linear().z() * force_constant_);
 
-      math::Vector3 torque(last_msg_.angular().x() * force_constant_,
-                           last_msg_.angular().y() * force_constant_,
-                           last_msg_.angular().z() * force_constant_);
-      
+      math::Vector3d torque(last_msg_.angular().x() * force_constant_,
+                            last_msg_.angular().y() * force_constant_,
+                            last_msg_.angular().z() * force_constant_);
+
       base_link_.AddWorldWrench(ecm, force, torque);
     }
+    updated_ = false;
   }
+}
 
 private:
   void OnMessage(const msgs::Twist &msg)
   {
-    if (last_msg_.linear().x() == msg.linear().x() &&
-        last_msg_.linear().y() == msg.linear().y() &&
-        last_msg_.linear().z() == msg.linear().z() &&
-        last_msg_.angular().x() == msg.angular().x() &&
-        last_msg_.angular().y() == msg.angular().y() &&
-        last_msg_.angular().z() == msg.angular().z()) {
-        gzdbg << "Received duplicate message. Ignoring." << std::endl;
-        return;
-    }
     last_msg_ = msg;
     updated_ = true;
 
