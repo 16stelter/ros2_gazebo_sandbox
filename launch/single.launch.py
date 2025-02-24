@@ -39,7 +39,7 @@ def generate_launch_description():
 
     spawn_robot = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
-            os.path.join(package_path, "launch", "spawn_leo.launch.py")
+            os.path.join(package_path, "launch", "spawn_multimodal.launch.py")
         ),
         launch_arguments={"robot_ns": LaunchConfiguration("robot_ns"),
                           "x": LaunchConfiguration("robot_x"),

@@ -15,6 +15,25 @@ find_package(nav_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(sensor_msgs REQUIRED)
+find_package(gz_plugin_vendor REQUIRED)
+find_package(gz-plugin REQUIRED)
+find_package(gz_sim_vendor REQUIRED)
+find_package(gz-sim REQUIRED)
+
+add_library(fake_flight_controller SHARED
+  plugins/fake_flight_controller.cpp
+)
+
+target_link_libraries(fake_flight_controller
+  gz-sim::core
+  gz-plugin::core
+)
+
+install(
+  TARGETS
+    fake_flight_controller
+  DESTINATION lib
+)
 
 set(INCLUDE_DIRS ${bitbots_msgs_INCLUDE_DIRS} ${rosgraph_msgs_INCLUDE_DIRS}
   ${std_msgs_INCLUDE_DIRS} ${ament_cmake_INCLUDE_DIRS} 
@@ -47,6 +66,7 @@ install(DIRECTORY models  DESTINATION share/${PROJECT_NAME})
 install(DIRECTORY launch DESTINATION share/${PROJECT_NAME})
 
 ament_environment_hooks("${CMAKE_CURRENT_SOURCE_DIR}/hooks/gz_sim_resource_path.dsv.in")
+ament_environment_hooks("${CMAKE_CURRENT_SOURCE_DIR}/hooks/gz_sim_system_plugin_path.dsv.in")
 
 ament_python_install_package(${PROJECT_NAME})
 
