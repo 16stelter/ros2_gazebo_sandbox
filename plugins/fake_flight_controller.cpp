@@ -9,7 +9,7 @@
 
 using namespace gz;
 
-namespace leo_gz
+namespace gz_plugins
 {
 class FakeFlightController
   : public gz::sim::System,
@@ -101,10 +101,10 @@ private:
 }
 };
 
-}  // namespace leo_gz
+}  // namespace gz_plugins
 
 GZ_ADD_PLUGIN(
-  leo_gz::FakeFlightController,
+  gz_plugins::FakeFlightController,
   gz::sim::System,
-  leo_gz::FakeFlightController::ISystemConfigure,
-  leo_gz::FakeFlightController::ISystemUpdate)
+  gz_plugins::FakeFlightController::ISystemConfigure,
+  gz_plugins::FakeFlightController::ISystemUpdate)
