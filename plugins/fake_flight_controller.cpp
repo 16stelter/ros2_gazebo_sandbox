@@ -6,8 +6,6 @@
 #include <gz/plugin/Register.hh>
 #include <gz/transport/Node.hh>
 #include <gz/msgs/twist.pb.h>
-#include "gz/sim/components/LinearVelocity.hh"
-#include "gz/sim/components/AngularVelocity.hh"
 #include "gz/sim/Util.hh"
 
 using namespace gz;
@@ -25,9 +23,9 @@ class FakeFlightController
   double force_constant_;
   bool configured_{false};
   Link base_link_;
-  EntityComponentManager *ecm_ = nullptr;
   gz::transport::Node node_;
   msgs::Twist last_msg_;
+  bool updated_ = false;
   std::string topic_;
 
 public:
@@ -61,19 +59,10 @@ public:
       return;
     }
     topic_ = sdf->Get<std::string>("topic");
-    
-
-    enableComponent<components::WorldAngularVelocity>(ecm,
-          base_link_.Entity());
-    enableComponent<components::WorldLinearVelocity>(ecm,
-          base_link_.Entity());
-
-    ecm_ = &ecm;
-    configured_ = true;
-
     node_.Subscribe(topic_, &FakeFlightController::OnMessage, this);
-
     base_link_ = Link(model_.LinkByName(ecm, "base_link"));
+
+    configured_ = true;
   }
 
   void Update(
@@ -81,6 +70,12 @@ public:
     EntityComponentManager & ecm) override
   {
     if (!configured_ || info.paused) {return;}
+
+    if (updated_) {
+      //base_link_.SetLinearVelocity(ecm, math::Vector3d(0, 0, 0));
+      //base_link_.SetAngularVelocity(ecm, math::Vector3d(0, 0, 0));
+      updated_ = false;
+    }
 
     if (last_msg_.has_linear() && last_msg_.has_angular()) {
       math::Vector3 force(last_msg_.linear().x() * force_constant_,
@@ -91,14 +86,24 @@ public:
                            last_msg_.angular().y() * force_constant_,
                            last_msg_.angular().z() * force_constant_);
       
-      base_link_.AddWorldWrench(*ecm_, force, torque);
+      base_link_.AddWorldWrench(ecm, force, torque);
     }
   }
 
 private:
   void OnMessage(const msgs::Twist &msg)
   {
+    if (last_msg_.linear().x() == msg.linear().x() &&
+        last_msg_.linear().y() == msg.linear().y() &&
+        last_msg_.linear().z() == msg.linear().z() &&
+        last_msg_.angular().x() == msg.angular().x() &&
+        last_msg_.angular().y() == msg.angular().y() &&
+        last_msg_.angular().z() == msg.angular().z()) {
+        gzdbg << "Received duplicate message. Ignoring." << std::endl;
+        return;
+    }
     last_msg_ = msg;
+    updated_ = true;
 
     gzdbg << "Received message: force(" 
           << msg.linear().x() << ", "
